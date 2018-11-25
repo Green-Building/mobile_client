@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Card, ListItem, Button } from 'react-native-elements'
 import { connect } from 'react-redux';
 import { MapView, Image } from 'expo';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -117,8 +118,15 @@ class HomeScreen extends Component {
                 coordinate={this.state.region}
                 title="title"
                 description="description"
-                onPress={this.goToBuildingScreen}
-              />
+              >
+                <MapView.Callout onPress={this.goToBuildingScreen}>
+                  <Card title='Building' style={{width: 200}}>
+                    <Text style={{width: 200}}>
+                      Building Address
+                    </Text>
+                  </Card>
+                </MapView.Callout>
+              </MapView.Marker>
             }
           </MapView>
         </View>
