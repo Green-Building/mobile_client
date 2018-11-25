@@ -20,7 +20,7 @@ class LoadingScreen extends Component {
   // Fetch the token from storage then navigate to our appropriate place
   checkAuthed = () => {
     const { isAuthenticated, navigation } = this.props;
-    if (isAuthenticated) {
+    if (!isAuthenticated) {
       navigation.navigate('main');
     } else {
       navigation.navigate('auth');
