@@ -22,6 +22,15 @@ class HomeScreen extends Component {
     //this.props.logout();
     navigation.navigate('login');
   }
+
+  goToBuildingScreen = () => {
+    const { navigation } = this.props;
+    //this.props.logout();
+    console.log("pressed !!!")
+    navigation.navigate('building', {
+      building_id: 1
+    });
+  }
   render() {
     const { isAuthenticated, navigation } = this.props;
     return (
@@ -106,8 +115,9 @@ class HomeScreen extends Component {
             {this.state.searched &&
               <MapView.Marker
                 coordinate={this.state.region}
-                title="hahaha"
+                title="title"
                 description="description"
+                onPress={this.goToBuildingScreen}
               />
             }
           </MapView>
