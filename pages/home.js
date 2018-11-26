@@ -120,7 +120,12 @@ class HomeScreen extends Component {
                 description="description"
               >
                 <MapView.Callout onPress={this.goToBuildingScreen}>
-                  <Card title='Building' style={{width: 200}}>
+                  <Card
+                    title='Building'
+                    style={{width: 50, height: 50}}
+                    image={{uri: 'https://facebook.github.io/react-native/docs/assets/favicon.png'}}
+                    style={{width: 200}}
+                  >
                     <Text style={{width: 200}}>
                       Building Address
                     </Text>
