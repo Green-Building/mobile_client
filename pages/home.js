@@ -29,7 +29,7 @@ class HomeScreen extends Component {
     //this.props.logout();
     console.log("pressed !!!")
     navigation.navigate('building', {
-      building_id: 1
+      building_id: 2
     });
   }
   render() {

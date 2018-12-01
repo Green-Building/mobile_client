@@ -9,30 +9,21 @@ import {
   INFRA_MANAGER_HOST
 } from '../api-config';
 
-class BuildingScreen extends Component {
-  state ={
-    building: {},
-    floors: [],
+class NodeScreen extends Component {
+  state = {
+    node: {},
+    sensors: [],
   }
 
   componentDidMount() {
     const { isAuthenticated, navigation } = this.props;
-    let buildingId = navigation.getParam('building_id', null);
-    return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`)
-    .then(buildingConfig => {
-      let building = buildingConfig.data;
-      _.forEach(building.floors, floor => {
-        floor.cluster = _.find(building.clusters, {floor_id: floor.id}) || null;
-      });
-      let floors = _.sortBy(building.floors, ['floor_number']);
-      this.setState({building, floors});
-    })
-  }
+    let nodeId = navigation.getParam('node_id', null);
 
-  handlePress = (floor) => {
-    const { navigation } = this.props;
-    navigation.navigate('floor', {
-      floor_id: floor.id
+    return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`)
+    .then(response => {
+      let node = response.data;
+      let sensors = node.sensors;
+      this.setState({node, sensors});
     });
   }
 
@@ -41,13 +32,12 @@ class BuildingScreen extends Component {
     console.log("this.state is >>>", this.state.floors);
     return (
       <View style={styles.container}>
-        {this.state.floors.map((l, i) => (
+        {this.state.sensors.map((l, i) => (
           <ListItem
-            onPress={() =>this.handlePress(l)}
             key={i}
-            title={`floor# ${l.floor_number}`}
-            subtitle={l.cluster && 'Has Cluster'}
-            badge={{ value: _.get(l, 'cluster.status', null), textStyle: { color: 'orange' }, containerStyle: { marginTop: -10 } }}
+            title={`sensor# ${l.id}`}
+            subtitle={l.type}
+            badge={{ value: l.status, textStyle: { color: 'orange' }, containerStyle: { marginTop: -10 } }}
           />
         ))}
       </View>
@@ -82,4 +72,4 @@ function mapStateToProps(state) {
 }
 
 
-export default connect(mapStateToProps)(BuildingScreen);
+export default connect(mapStateToProps)(NodeScreen);

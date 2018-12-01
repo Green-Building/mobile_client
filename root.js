@@ -11,6 +11,8 @@ import NotFoundScreen from './pages/notFound';
 import AuthLoadingScreen from './pages/authLoading';
 import HomeScreen from './pages/home';
 import BuildingScreen from './pages/building';
+import FloorScreen from './pages/floor';
+import NodeScreen from './pages/node';
 
 const { persistor, store } = configureStore();
 
@@ -24,6 +26,7 @@ const AuthTab = createBottomTabNavigator({
   lazyLoad: true,
 });
 
+
 const contentNavigator = createStackNavigator({
   main: {
     screen: HomeScreen,
@@ -36,9 +39,27 @@ const contentNavigator = createStackNavigator({
     path: 'building/:building_id',
     // The action and route params are extracted from the path.
 
-    navigationOptions: () => ({
-      title: `Building`,
+    navigationOptions: ({navigation}) => ({
+      title: `Building ${navigation.getParam('building_id', null)}`,
 
+    }),
+  },
+  floor: {
+    screen: FloorScreen,
+    path: 'floor/:floor_id',
+    // The action and route params are extracted from the path.
+
+    navigationOptions: ({navigation}) => ({
+      title: `Floor ${navigation.getParam('floor_id', null)}`,
+    }),
+  },
+  node: {
+    screen: NodeScreen,
+    path: 'node/:node_id',
+    // The action and route params are extracted from the path.
+
+    navigationOptions: ({navigation}) => ({
+      title: `Node ${navigation.getParam('node_id', null)}`,
     }),
   }
 })
