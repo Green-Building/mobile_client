@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import Promise from 'bluebird';
 import PropTypes from 'prop-types';
 import {
   View,
@@ -13,6 +14,8 @@ import {
   TouchableOpacity
 } from 'react-native';
 import { FormLabel, FormInput } from 'react-native-elements';
+
+import { login, logout } from '../reducers/authReducer';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -29,7 +32,12 @@ class LoginScreen extends Component {
   handleSubmit(e) {
     e.preventDefault();
     const { email, password } = this.state;
-    const { navigation } = this.props;
+    const { navigation, login } = this.props;
+    return Promise.resolve(login(email, password))
+    .then(response => {
+      console.log("response is >>>", response);
+      navigation.navigate('main');
+    })
   }
 
   gotoSignup(e) {
@@ -124,4 +132,24 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps)(LoginScreen);
+function mapStateToProps(state) {
+  const { auth } = state;
+  const { loading, isAuthenticated } = auth;
+  return {
+    loading,
+    isAuthenticated
+  };
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    login: (email, password) => {
+      dispatch(login(email, password));
+    },
+    logout: () => {
+      dispatch(logout());
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

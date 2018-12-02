@@ -1,18 +1,37 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
+import Promise from 'bluebird';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card, ListItem, Button } from 'react-native-elements'
 import { connect } from 'react-redux';
 import { MapView, Image } from 'expo';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-
 import axios from 'axios';
 import {
   INFRA_MANAGER_HOST
 } from '../api-config';
+
+import { login, logout } from '../reducers/authReducer';
+
 const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } }};
 const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818, lng: 2.2940881 } }};
 class HomeScreen extends Component {
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerRight: (
+        <Button
+          onPress={() => {
+            return Promise.resolve(logout())
+            .then(() => {
+              navigation.navigate('login');
+            })
+          }}
+          title="Logout"
+        />
+      ),
+    };
+  }
+
   state = {
     searched: false,
     region: {
@@ -21,12 +40,6 @@ class HomeScreen extends Component {
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
     }
-  }
-
-  logout(e){
-    const { navigation } = this.props;
-    //this.props.logout();
-    navigation.navigate('login');
   }
 
   goToBuildingScreen = (building) => {
@@ -199,7 +212,7 @@ function mapStateToProps(state) {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     logout: () => {
-      dispatch(action.signout());
+      dispatch(logout());
     },
   }
 }

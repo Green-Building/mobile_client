@@ -1,5 +1,8 @@
 import _ from 'lodash';
 import axios from 'axios';
+import qs from 'qs';
+
+import { AUTH_HOST } from '../api-config';
 
 /// CONSTANTS and Configuration
 const AUTH_REQUEST = 'AUTH_REQUEST';
@@ -11,8 +14,62 @@ const INITIAL_STATE = {
   loading: false,
   isAuthenticated: false,
   token: null,
-  user: null,
+  user: {},
 };
+
+function startAuthentication() {
+  return { type: AUTH_REQUEST };
+}
+
+function successLogin(token, user) {
+  return {
+    type: AUTH_RECEIVED,
+    token,
+    user,
+  }
+}
+
+function errorLogin(error) {
+  return {
+    type: AUTH_FAILED,
+    error,
+  }
+}
+
+function successLogout() {
+  return {
+    type: AUTH_SIGNOUT,
+  }
+}
+
+export const login = (email, password) => (dispatch, getState) => {
+  dispatch(startAuthentication());
+  const requestBody = {
+    email,
+    password,
+  }
+  return axios({
+    method: 'post',
+    url: `${AUTH_HOST}/auth/login`,
+    data: qs.stringify(requestBody),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+  .then(response => {
+    const { token, user } = response.data;
+    dispatch(successLogin(token, user));
+    return {success: true};
+  })
+  .catch(err => {
+    dispatch(errorLogin(err));
+  })
+};
+
+export const logout = () => (dispatch, getState) => {
+  dispatch(successLogout());
+}
+
 
 // Reducer
 export default function reducer(state = INITIAL_STATE, dispatchedAction = {}) {
@@ -26,6 +83,8 @@ export default function reducer(state = INITIAL_STATE, dispatchedAction = {}) {
       newState =  _.assign({}, state, {
         loading: false,
         isAuthenticated: true,
+        token: dispatchedAction.token,
+        user: dispatchedAction.user,
       });
       return newState;
     case AUTH_FAILED:
