@@ -16,6 +16,7 @@ import NodeScreen from './pages/node';
 
 import FloorModalScreen from './pages/floorModal';
 import RoomModalScreen from './pages/roomModal';
+import SensorModalScreen from './pages/sensorModal';
 
 const { persistor, store } = configureStore();
 
@@ -70,6 +71,9 @@ const contentNavigator = createStackNavigator({
     navigationOptions: ({navigation}) => ({
       title: `Node ${navigation.getParam('node_id', null)}`,
     }),
+  },
+  SensorModalScreen: {
+    screen: SensorModalScreen,
   }
 })
 

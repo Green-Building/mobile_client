@@ -7,10 +7,11 @@ import axios from 'axios';
 import {
   INFRA_MANAGER_HOST
 } from '../api-config';
-class RoomModalScreen extends Component {
+class SensorModalScreen extends Component {
   state = {
     name: '',
     status: '',
+    type: '',
   }
   componentDidMount() {
     const { isAuthenticated, navigation } = this.props;
@@ -18,7 +19,7 @@ class RoomModalScreen extends Component {
 
   }
 
-  goToNode = () => {
+  goToNode() {
     const { isAuthenticated, navigation } = this.props;
     let room = navigation.getParam('room', {});
     let cluster = navigation.getParam('cluster', {});
@@ -28,14 +29,14 @@ class RoomModalScreen extends Component {
   }
   render() {
     const { navigation } = this.props;
-    let room = navigation.getParam('room', {});
-    let cluster = navigation.getParam('cluster', {});
+    let node = navigation.getParam('node', {});
+    let sensor = navigation.getParam('sensor', {});
     let handleDelete = navigation.getParam('handleDelete', _.noop);
     let handleAdd = navigation.getParam('handleAdd', _.noop);
     let handleUpdate = navigation.getParam('handleUpdate', _.noop);
     return (
       <View style={styles.container}>
-        {_.isEmpty(room.node) ?
+        {_.isEmpty(sensor) ?
           <View style={styles.button}>
             <FormLabel>Name</FormLabel>
             <FormInput
@@ -45,8 +46,20 @@ class RoomModalScreen extends Component {
               returnKeyType="next"
               placeholder="Name"
               onChangeText={name => {this.setState({name})}}
-              onSubmitEditing={() => this.statusInput.focus()}
+              onSubmitEditing={() => this.typeInput.focus()}
               value={this.state.name}
+            />
+            <FormLabel>Type</FormLabel>
+            <FormInput
+              autoCapitalize="none"
+              ref={(input)=> this.typeInput = input}
+              autoCorrect={false}
+              keyboardType='default'
+              returnKeyType="next"
+              placeholder="Type"
+              onChangeText={type => {this.setState({type})}}
+              onSubmitEditing={() => this.statusInput.focus()}
+              value={this.state.type}
             />
             <FormLabel>Status</FormLabel>
             <FormInput
@@ -59,7 +72,7 @@ class RoomModalScreen extends Component {
               onChangeText={status => {this.setState({status})}}
               value={this.state.status}
             />
-            <Button title="Add" onPress={()=>{handleAdd(_.assign({}, this.state, {room_id: room.id, cluster_id: cluster.id}));}} />
+            <Button title="Add" onPress={()=>{handleAdd(_.assign({}, this.state, {node_id: node.id, cluster_id: node.cluster_id}));}} />
 
           </View>:
           <View style={styles.button}>
@@ -70,9 +83,21 @@ class RoomModalScreen extends Component {
               keyboardType='default'
               returnKeyType="next"
               placeholder="Name"
-              onChangeText={name => {room.node.name=name}}
+              onChangeText={name => {sensor.name=name}}
+              onSubmitEditing={() => this.typeInput.focus()}
+              value={sensor.name}
+            />
+            <FormLabel>Type</FormLabel>
+            <FormInput
+              autoCapitalize="none"
+              ref={(input)=> this.typeInput = input}
+              autoCorrect={false}
+              keyboardType='default'
+              returnKeyType="next"
+              placeholder="Type"
+              onChangeText={type => {sensor.type=type}}
               onSubmitEditing={() => this.statusInput.focus()}
-              value={room.node.name}
+              value={sensor.type}
             />
             <FormLabel>Status</FormLabel>
             <FormInput
@@ -82,12 +107,11 @@ class RoomModalScreen extends Component {
               keyboardType='default'
               returnKeyType="go"
               placeholder="Status"
-              onChangeText={status => {room.node.status=status}}
-              value={room.node.status}
+              onChangeText={status => {sensor.status=status}}
+              value={sensor.status}
             />
-            <Button title="Update" onPress={()=>{handleUpdate(room.node)}} />
-            <Button title="Delete" onPress={()=>handleDelete(room)} />
-            <Button title="Go to Node" onPress={this.goToNode} />
+            <Button title="Update" onPress={()=>{handleUpdate(sensor)}} />
+            <Button title="Delete" onPress={()=>handleDelete(sensor)} />
           </View>
         }
         <Button
@@ -116,4 +140,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RoomModalScreen;
+export default SensorModalScreen;

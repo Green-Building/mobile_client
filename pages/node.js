@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Button } from 'react-native';
 import { connect } from 'react-redux';
 import { ListItem } from 'react-native-elements'
 
@@ -27,6 +27,68 @@ class NodeScreen extends Component {
     });
   }
 
+  handlePress = (sensor) => {
+    const { navigation } = this.props;
+    navigation.navigate('SensorModalScreen', {
+      node: this.state.node,
+      sensor: sensor,
+      handleDelete: this.handleDelete,
+      handleAdd: this.handleAdd,
+      handleUpdate: this.handleUpdate,
+    });
+  }
+
+  handleDelete = (sensor) => {
+    return axios.delete(`${INFRA_MANAGER_HOST}/sensors/${sensor.id}`)
+    .then(response => {
+      const { navigation } = this.props;
+      let nodeId = navigation.getParam('node_id', null);
+      return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`)
+    })
+    .then(response => {
+      let node = response.data;
+      let sensors = node.sensors;
+      this.setState({node, sensors});
+    })
+    .catch(err =>{
+      console.log('err is >>>', err);
+    })
+  }
+
+  handleAdd = (newSensor) => {
+    return axios.post(`${INFRA_MANAGER_HOST}/sensors`, newSensor)
+    .then(response => {
+      const { navigation } = this.props;
+      let nodeId = navigation.getParam('node_id', null);
+      return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`)
+    })
+    .then(response => {
+      let node = response.data;
+      let sensors = node.sensors;
+      this.setState({node, sensors});
+    })
+    .catch(err =>{
+      console.log('err is >>>', err);
+    })
+  }
+
+  handleUpdate = (sensor) => {
+    return axios.put(`${INFRA_MANAGER_HOST}/sensors/${sensor.id}`, sensor)
+    .then(response => {
+      const { navigation } = this.props;
+      let nodeId = navigation.getParam('node_id', null);
+      return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`)
+    })
+    .then(response => {
+      let node = response.data;
+      let sensors = node.sensors;
+      this.setState({node, sensors});
+    })
+    .catch(err =>{
+      console.log('err is >>>', err);
+    })
+  }
+
   render() {
     const { isAuthenticated, navigation } = this.props;
     console.log("this.state is >>>", this.state.floors);
@@ -34,12 +96,14 @@ class NodeScreen extends Component {
       <View style={styles.container}>
         {this.state.sensors.map((l, i) => (
           <ListItem
+            onPress={() =>this.handlePress(l)}
             key={i}
             title={`sensor# ${l.id}`}
             subtitle={l.type}
             badge={{ value: l.status, textStyle: { color: 'orange' }, containerStyle: { marginTop: -10 } }}
           />
         ))}
+        <Button title="Add Sensor" onPress={() =>this.handlePress(null)} />
       </View>
     );
   }
