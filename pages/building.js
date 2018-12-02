@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Button } from 'react-native';
 import { connect } from 'react-redux';
 import { ListItem } from 'react-native-elements'
 
@@ -16,7 +16,7 @@ class BuildingScreen extends Component {
   }
 
   componentDidMount() {
-    const { isAuthenticated, navigation } = this.props;
+    const { navigation } = this.props;
     let buildingId = navigation.getParam('building_id', null);
     return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`)
     .then(buildingConfig => {
@@ -31,19 +31,88 @@ class BuildingScreen extends Component {
 
   handlePress = (floor) => {
     const { navigation } = this.props;
+    console.log("this.floor is>>>", floor);
+    navigation.navigate('FloorModalScreen', {
+      floor: floor,
+      handleDelete: this.handleDelete,
+      handleAdd: this.handleAdd,
+      handleUpdate: this.handleUpdate,
+    });
+    /*
     navigation.navigate('floor', {
       floor_id: floor.id
     });
+    */
+  }
+
+  handleDelete = (floor) => {
+    console.log("floor is >>>", floor);
+    return axios.delete(`${INFRA_MANAGER_HOST}/clusters/${floor.cluster.id}`)
+    .then(response => {
+      const { navigation } = this.props;
+      let buildingId = navigation.getParam('building_id', null);
+      return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`)
+    })
+    .then(buildingConfig => {
+      let building = buildingConfig.data;
+      _.forEach(building.floors, floor => {
+        floor.cluster = _.find(building.clusters, {floor_id: floor.id}) || null;
+      });
+      let floors = _.sortBy(building.floors, ['floor_number']);
+      this.setState({building, floors});
+    })
+    .catch(err =>{
+      console.log('err is >>>', err);
+    })
+  }
+
+  handleAdd = (newCluster) => {
+    return axios.post(`${INFRA_MANAGER_HOST}/clusters`, newCluster)
+    .then(response => {
+      const { navigation } = this.props;
+      let buildingId = navigation.getParam('building_id', null);
+      return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`)
+    })
+    .then(buildingConfig => {
+      let building = buildingConfig.data;
+      _.forEach(building.floors, floor => {
+        floor.cluster = _.find(building.clusters, {floor_id: floor.id}) || null;
+      });
+      let floors = _.sortBy(building.floors, ['floor_number']);
+      this.setState({building, floors});
+    })
+    .catch(err =>{
+      console.log('err is >>>', err);
+    })
+  }
+
+  handleUpdate = (updatedCluster) => {
+    return axios.put(`${INFRA_MANAGER_HOST}/clusters/${updatedCluster.id}`, _.omit(updatedCluster, 'id'))
+    .then(response => {
+      const { navigation } = this.props;
+      let buildingId = navigation.getParam('building_id', null);
+      return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`)
+    })
+    .then(buildingConfig => {
+      let building = buildingConfig.data;
+      _.forEach(building.floors, floor => {
+        floor.cluster = _.find(building.clusters, {floor_id: floor.id}) || null;
+      });
+      let floors = _.sortBy(building.floors, ['floor_number']);
+      this.setState({building, floors});
+    })
+    .catch(err =>{
+      console.log('err is >>>', err);
+    })
   }
 
   render() {
     const { isAuthenticated, navigation } = this.props;
-    console.log("this.state is >>>", this.state.floors);
     return (
       <View style={styles.container}>
         {this.state.floors.map((l, i) => (
           <ListItem
-            onPress={() =>this.handlePress(l)}
+            onPress={()=>this.handlePress(l)}
             key={i}
             title={`floor# ${l.floor_number}`}
             subtitle={l.cluster && 'Has Cluster'}
@@ -64,6 +133,11 @@ const styles = StyleSheet.create({
     width: 200,
     backgroundColor: '#2980b6',
     paddingVertical: 15
+  },
+  subtitleView: {
+    flexDirection: 'row',
+    paddingLeft: 10,
+    paddingTop: 5
   },
   buttonText:{
     color: '#fff',

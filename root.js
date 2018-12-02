@@ -14,6 +14,8 @@ import BuildingScreen from './pages/building';
 import FloorScreen from './pages/floor';
 import NodeScreen from './pages/node';
 
+import FloorModalScreen from './pages/floorModal';
+
 const { persistor, store } = configureStore();
 
 const AuthTab = createBottomTabNavigator({
@@ -43,6 +45,9 @@ const contentNavigator = createStackNavigator({
       title: `Building ${navigation.getParam('building_id', null)}`,
 
     }),
+  },
+  FloorModalScreen: {
+    screen: FloorModalScreen,
   },
   floor: {
     screen: FloorScreen,
