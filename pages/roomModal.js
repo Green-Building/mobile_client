@@ -7,33 +7,35 @@ import axios from 'axios';
 import {
   INFRA_MANAGER_HOST
 } from '../api-config';
-class FloorModalScreen extends Component {
+class RoomModalScreen extends Component {
   state = {
     name: '',
     status: '',
   }
   componentDidMount() {
-    const { navigation } = this.props;
-    console.log("navigation.params >>>", navigation.getParam('floor', null));
+    const { isAuthenticated, navigation } = this.props;
+    console.log("navigation.params >>>", navigation.getParam('room', null));
 
   }
 
-  goToFloor = () => {
-    const { navigation } = this.props;
-    let floor = navigation.getParam('floor', {});
-    navigation.navigate('floor', {
-      floor_id: floor.id,
+  goToNode() {
+    const { isAuthenticated, navigation } = this.props;
+    let room = navigation.getParam('room', {});
+    let cluster = navigation.getParam('cluster', {});
+    navigation.navigate('node', {
+      node_id: room.node.id,
     });
   }
   render() {
     const { navigation } = this.props;
-    let floor = navigation.getParam('floor', {});
+    let room = navigation.getParam('room', {});
+    let cluster = navigation.getParam('cluster', {});
     let handleDelete = navigation.getParam('handleDelete', _.noop);
     let handleAdd = navigation.getParam('handleAdd', _.noop);
     let handleUpdate = navigation.getParam('handleUpdate', _.noop);
     return (
       <View style={styles.container}>
-        {_.isEmpty(floor.cluster) ?
+        {_.isEmpty(room.node) ?
           <View style={styles.button}>
             <FormLabel>Name</FormLabel>
             <FormInput
@@ -57,7 +59,7 @@ class FloorModalScreen extends Component {
               onChangeText={status => {this.setState({status})}}
               value={this.state.status}
             />
-            <Button title="Add" onPress={()=>{handleAdd(_.assign({}, this.state, {floor_id: floor.id, building_id: floor.building_id}));}} />
+            <Button title="Add" onPress={()=>{handleAdd(_.assign({}, this.state, {room_id: room.id, cluster_id: cluster.id}));}} />
 
           </View>:
           <View style={styles.button}>
@@ -68,9 +70,9 @@ class FloorModalScreen extends Component {
               keyboardType='default'
               returnKeyType="next"
               placeholder="Name"
-              onChangeText={name => {floor.cluster.name=name}}
+              onChangeText={name => {room.node.name=name}}
               onSubmitEditing={() => this.statusInput.focus()}
-              value={floor.cluster.name}
+              value={room.node.name}
             />
             <FormLabel>Status</FormLabel>
             <FormInput
@@ -80,12 +82,12 @@ class FloorModalScreen extends Component {
               keyboardType='default'
               returnKeyType="go"
               placeholder="Status"
-              onChangeText={status => {floor.cluster.status=status}}
-              value={floor.cluster.status}
+              onChangeText={status => {room.node.status=status}}
+              value={room.node.status}
             />
-            <Button title="Update" onPress={()=>{handleUpdate(floor.cluster)}} />
-            <Button title="Delete" onPress={()=>handleDelete(floor)} />
-            <Button title="Go to Floor" onPress={this.goToFloor} />
+            <Button title="Update" onPress={()=>{handleUpdate(room.node)}} />
+            <Button title="Delete" onPress={()=>handleDelete(room)} />
+            <Button title="Go to Floor" onPress={this.goToNode} />
           </View>
         }
         <Button
@@ -114,4 +116,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FloorModalScreen
+export default RoomModalScreen;

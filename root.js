@@ -15,6 +15,7 @@ import FloorScreen from './pages/floor';
 import NodeScreen from './pages/node';
 
 import FloorModalScreen from './pages/floorModal';
+import RoomModalScreen from './pages/roomModal';
 
 const { persistor, store } = configureStore();
 
@@ -57,6 +58,9 @@ const contentNavigator = createStackNavigator({
     navigationOptions: ({navigation}) => ({
       title: `Floor ${navigation.getParam('floor_id', null)}`,
     }),
+  },
+  RoomModalScreen: {
+    screen: RoomModalScreen,
   },
   node: {
     screen: NodeScreen,

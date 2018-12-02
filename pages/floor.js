@@ -13,6 +13,7 @@ class FloorScreen extends Component {
   state = {
     rooms: [],
     nodes: [],
+    cluster:{},
   }
 
   componentDidMount() {
@@ -46,16 +47,147 @@ class FloorScreen extends Component {
       _.forEach(rooms, room => {
         room.node = _.find(nodes, {room_id: room.id}) || {};
       });
-      this.setState({rooms, nodes});
+      this.setState({rooms, nodes, cluster});
     });
   }
 
+  handlePress = (room) => {
+    const { navigation } = this.props;
+    navigation.navigate('RoomModalScreen', {
+      room: room,
+      cluster: this.state.cluster,
+      handleDelete: this.handleDelete,
+      handleAdd: this.handleAdd,
+      handleUpdate: this.handleUpdate,
+    });
+  }
+  /*
   handlePress = (room) => {
     const { navigation } = this.props;
     navigation.navigate('node', {
       node_id: room.node.id
     });
   }
+  */
+
+  handleDelete = (room) => {
+    return axios.delete(`${INFRA_MANAGER_HOST}/nodes/${room.node.id}`)
+    .then(response => {
+      const { navigation } = this.props;
+      let floorId = navigation.getParam('floor_id', null);
+      if (INFRA_MANAGER_HOST.indexOf('v0') !== -1) {
+        url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=floor,room,node,sensor`;
+      } else {
+        url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=room,node,sensor`;
+      }
+      return axios.get(url);
+    })
+    .then(response => {
+      let floor, cluster, rooms, nodes, sensors;
+      if (INFRA_MANAGER_HOST.indexOf('v0') !== -1) {
+        cluster = response.data;
+        floor = cluster.floor;
+        rooms = floor.rooms;
+        nodes = cluster.nodes;
+      } else {
+        floor = response.data;
+        cluster = floor.cluster;
+        rooms = floor.rooms;//cluster.floor.rooms;
+        nodes = _.compact(floor.nodes);
+        sensors = _.compact(floor.sensors);
+        _.forEach(nodes, node => {
+          node.sensors = _.filter(sensors, {node_id: node.id}) || {};
+        })
+      }
+      _.forEach(rooms, room => {
+        room.node = _.find(nodes, {room_id: room.id}) || {};
+      });
+      this.setState({rooms, nodes, cluster});
+    })
+    .catch(err => {
+      console.log('err is >>>', err);
+    })
+  }
+
+  handleAdd = (newNode) => {
+    return axios.post(`${INFRA_MANAGER_HOST}/nodes`, newNode)
+    .then(response => {
+      const { navigation } = this.props;
+      let floorId = navigation.getParam('floor_id', null);
+      if (INFRA_MANAGER_HOST.indexOf('v0') !== -1) {
+        url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=floor,room,node,sensor`;
+      } else {
+        url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=room,node,sensor`;
+      }
+      return axios.get(url);
+    })
+    .then(response => {
+      let floor, cluster, rooms, nodes, sensors;
+      if (INFRA_MANAGER_HOST.indexOf('v0') !== -1) {
+        cluster = response.data;
+        floor = cluster.floor;
+        rooms = floor.rooms;
+        nodes = cluster.nodes;
+      } else {
+        floor = response.data;
+        cluster = floor.cluster;
+        rooms = floor.rooms;//cluster.floor.rooms;
+        nodes = _.compact(floor.nodes);
+        sensors = _.compact(floor.sensors);
+        _.forEach(nodes, node => {
+          node.sensors = _.filter(sensors, {node_id: node.id}) || {};
+        })
+      }
+      _.forEach(rooms, room => {
+        room.node = _.find(nodes, {room_id: room.id}) || {};
+      });
+      this.setState({rooms, nodes, cluster});
+    })
+    .catch(err => {
+      console.log('err is >>>', err);
+    })
+  }
+
+  handleUpdate = (updatedNode) => {
+    return axios.put(`${INFRA_MANAGER_HOST}/nodes/${updatedNode.id}`, _.omit(updatedNode, 'id'))
+    .then(response => {
+      const { navigation } = this.props;
+      let floorId = navigation.getParam('floor_id', null);
+      if (INFRA_MANAGER_HOST.indexOf('v0') !== -1) {
+        url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=floor,room,node,sensor`;
+      } else {
+        url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=room,node,sensor`;
+      }
+      return axios.get(url);
+    })
+    .then(response => {
+      let floor, cluster, rooms, nodes, sensors;
+      if (INFRA_MANAGER_HOST.indexOf('v0') !== -1) {
+        cluster = response.data;
+        floor = cluster.floor;
+        rooms = floor.rooms;
+        nodes = cluster.nodes;
+      } else {
+        floor = response.data;
+        cluster = floor.cluster;
+        rooms = floor.rooms;//cluster.floor.rooms;
+        nodes = _.compact(floor.nodes);
+        sensors = _.compact(floor.sensors);
+        _.forEach(nodes, node => {
+          node.sensors = _.filter(sensors, {node_id: node.id}) || {};
+        })
+      }
+      _.forEach(rooms, room => {
+        room.node = _.find(nodes, {room_id: room.id}) || {};
+      });
+      this.setState({rooms, nodes, cluster});
+    })
+    .catch(err => {
+      console.log('err is >>>', err);
+    })
+  }
+
+
 
   render() {
     const { isAuthenticated, navigation } = this.props;
