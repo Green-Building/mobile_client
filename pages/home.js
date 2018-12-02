@@ -5,6 +5,11 @@ import { Card, ListItem, Button } from 'react-native-elements'
 import { connect } from 'react-redux';
 import { MapView, Image } from 'expo';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+
+import axios from 'axios';
+import {
+  INFRA_MANAGER_HOST
+} from '../api-config';
 const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } }};
 const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818, lng: 2.2940881 } }};
 class HomeScreen extends Component {
@@ -24,12 +29,12 @@ class HomeScreen extends Component {
     navigation.navigate('login');
   }
 
-  goToBuildingScreen = () => {
+  goToBuildingScreen = (building) => {
     const { navigation } = this.props;
     //this.props.logout();
     console.log("pressed !!!")
     navigation.navigate('building', {
-      building_id: 2
+      building_id: building.id
     });
   }
   render() {
@@ -68,7 +73,26 @@ class HomeScreen extends Component {
               let region = _.cloneDeep(this.state.region);
               region.latitude = location.lat;
               region.longitude = location.lng;
-              this.setState({region, searched: true});
+              return axios.get(`${INFRA_MANAGER_HOST}/buildings/search/geocode`, {
+                params: {
+                  latitude: region.latitude,
+                  longitude:  region.longitude,
+                  radius: 5,
+                },
+              })
+              .then(response => {
+                const buildings = response.data;
+                console.log("buiildings>>>", buildings);
+                _.forEach(buildings, building => {
+                  building.position = {
+                    latitude: building.latitude,
+                    longitude: building.longitude,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421,
+                  }
+                });
+                this.setState({region, markers: buildings, searched: true});
+              })
             }}
 
             getDefaultValue={() => '1 Washington Street, San Jose'}
@@ -113,25 +137,28 @@ class HomeScreen extends Component {
           <MapView style={{flex: 1}}
             region={this.state.region}
           >
-            {this.state.searched &&
-              <MapView.Marker
-                coordinate={this.state.region}
-                title="title"
-                description="description"
-              >
-                <MapView.Callout onPress={this.goToBuildingScreen}>
-                  <Card
-                    title='Building'
-                    style={{width: 50, height: 50}}
-                    image={{uri: 'https://facebook.github.io/react-native/docs/assets/favicon.png'}}
-                    style={{width: 200}}
+            {this.state.searched && _.map(this.state.markers, marker => {
+                return (
+                  <MapView.Marker
+                    key={marker.id}
+                    coordinate={marker.position}
+                    title="title"
+                    description="description"
                   >
-                    <Text style={{width: 200}}>
-                      Building Address
-                    </Text>
-                  </Card>
-                </MapView.Callout>
-              </MapView.Marker>
+                    <MapView.Callout onPress={()=>this.goToBuildingScreen(marker)}>
+                      <Card
+                        title='Building'
+                        style={{width: 50, height: 50}}
+                        image={{uri: marker.image_url}}
+                        style={{width: 200}}
+                      >
+                        <Text style={{width: 200}}>
+                          {marker.address}
+                        </Text>
+                      </Card>
+                    </MapView.Callout>
+                  </MapView.Marker>
+                )})
             }
           </MapView>
         </View>
