@@ -1,8 +1,12 @@
 import _ from 'lodash';
 import axios from 'axios';
+import Promise from 'bluebird';
 import qs from 'qs';
+import { purgeStoredState, persistStore } from 'redux-persist';
 
 import { AUTH_HOST } from '../api-config';
+import persistConfig from '../persistConfig';
+import { AsyncStorage } from 'react-native';
 
 /// CONSTANTS and Configuration
 const AUTH_REQUEST = 'AUTH_REQUEST';
@@ -37,9 +41,7 @@ function errorLogin(error) {
 }
 
 function successLogout() {
-  return {
-    type: AUTH_SIGNOUT,
-  }
+
 }
 
 export const login = (email, password) => (dispatch, getState) => {
@@ -67,7 +69,13 @@ export const login = (email, password) => (dispatch, getState) => {
 };
 
 export const logout = () => (dispatch, getState) => {
-  dispatch(successLogout());
+  return Promise.resolve(AsyncStorage.removeItem('auth')) //purgeStoredState(persistConfig);
+  .then(() => {
+    purgeStoredState(persistConfig);
+    dispatch({
+      type: AUTH_SIGNOUT,
+    });
+  })
 }
 
 

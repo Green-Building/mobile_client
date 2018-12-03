@@ -17,7 +17,7 @@ class FloorScreen extends Component {
   }
 
   componentDidMount() {
-    const { isAuthenticated, navigation } = this.props;
+    const { isAuthenticated, navigation, token } = this.props;
     let floorId = navigation.getParam('floor_id', null);
     if (INFRA_MANAGER_HOST.indexOf('v0') !== -1) {
       url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=floor,room,node,sensor`;
@@ -25,7 +25,11 @@ class FloorScreen extends Component {
       url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=room,node,sensor`;
     }
 
-    return axios.get(url)
+    return axios.get(url, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       let floor, cluster, rooms, nodes, sensors;
       if (INFRA_MANAGER_HOST.indexOf('v0') !== -1) {
@@ -71,7 +75,12 @@ class FloorScreen extends Component {
   */
 
   handleDelete = (room) => {
-    return axios.delete(`${INFRA_MANAGER_HOST}/nodes/${room.node.id}`)
+    const { token } = this.props;
+    return axios.delete(`${INFRA_MANAGER_HOST}/nodes/${room.node.id}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       const { navigation } = this.props;
       let floorId = navigation.getParam('floor_id', null);
@@ -80,7 +89,11 @@ class FloorScreen extends Component {
       } else {
         url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=room,node,sensor`;
       }
-      return axios.get(url);
+      return axios.get(url, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      });
     })
     .then(response => {
       let floor, cluster, rooms, nodes, sensors;
@@ -110,7 +123,12 @@ class FloorScreen extends Component {
   }
 
   handleAdd = (newNode) => {
-    return axios.post(`${INFRA_MANAGER_HOST}/nodes`, newNode)
+    const { token } = this.props;
+    return axios.post(`${INFRA_MANAGER_HOST}/nodes`, newNode, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       const { navigation } = this.props;
       let floorId = navigation.getParam('floor_id', null);
@@ -119,7 +137,11 @@ class FloorScreen extends Component {
       } else {
         url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=room,node,sensor`;
       }
-      return axios.get(url);
+      return axios.get(url, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      });
     })
     .then(response => {
       let floor, cluster, rooms, nodes, sensors;
@@ -149,7 +171,12 @@ class FloorScreen extends Component {
   }
 
   handleUpdate = (updatedNode) => {
-    return axios.put(`${INFRA_MANAGER_HOST}/nodes/${updatedNode.id}`, _.omit(updatedNode, 'id'))
+    const { token } = this.props;
+    return axios.put(`${INFRA_MANAGER_HOST}/nodes/${updatedNode.id}`, _.omit(updatedNode, 'id'), {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       const { navigation } = this.props;
       let floorId = navigation.getParam('floor_id', null);
@@ -158,7 +185,11 @@ class FloorScreen extends Component {
       } else {
         url = `${INFRA_MANAGER_HOST}/floors/${floorId}?fetch_nested=room,node,sensor`;
       }
-      return axios.get(url);
+      return axios.get(url, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      });
     })
     .then(response => {
       let floor, cluster, rooms, nodes, sensors;
@@ -191,7 +222,6 @@ class FloorScreen extends Component {
 
   render() {
     const { isAuthenticated, navigation } = this.props;
-    console.log("this.state is >>>", this.state.floors);
     return (
       <View style={styles.container}>
         {this.state.rooms.map((l, i) => (
@@ -227,10 +257,11 @@ const styles = StyleSheet.create({
 
 function mapStateToProps(state) {
   const { auth } = state;
-  const { loading, isAuthenticated } = auth;
+  const { loading, isAuthenticated, token } = auth;
   return {
     loading,
-    isAuthenticated
+    isAuthenticated,
+    token
   };
 }
 

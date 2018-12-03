@@ -16,10 +16,14 @@ class NodeScreen extends Component {
   }
 
   componentDidMount() {
-    const { isAuthenticated, navigation } = this.props;
+    const { isAuthenticated, navigation, token } = this.props;
     let nodeId = navigation.getParam('node_id', null);
 
-    return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`)
+    return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       let node = response.data;
       let sensors = node.sensors;
@@ -39,11 +43,20 @@ class NodeScreen extends Component {
   }
 
   handleDelete = (sensor) => {
-    return axios.delete(`${INFRA_MANAGER_HOST}/sensors/${sensor.id}`)
+    const { token } = this.props;
+    return axios.delete(`${INFRA_MANAGER_HOST}/sensors/${sensor.id}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       const { navigation } = this.props;
       let nodeId = navigation.getParam('node_id', null);
-      return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`)
+      return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      })
     })
     .then(response => {
       let node = response.data;
@@ -56,11 +69,20 @@ class NodeScreen extends Component {
   }
 
   handleAdd = (newSensor) => {
-    return axios.post(`${INFRA_MANAGER_HOST}/sensors`, newSensor)
+    const { token } = this.props;
+    return axios.post(`${INFRA_MANAGER_HOST}/sensors`, newSensor, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       const { navigation } = this.props;
       let nodeId = navigation.getParam('node_id', null);
-      return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`)
+      return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      })
     })
     .then(response => {
       let node = response.data;
@@ -73,11 +95,21 @@ class NodeScreen extends Component {
   }
 
   handleUpdate = (sensor) => {
-    return axios.put(`${INFRA_MANAGER_HOST}/sensors/${sensor.id}`, sensor)
+    const { token } = this.props;
+    console.log("token in handleupdate is >>>", token)
+    return axios.put(`${INFRA_MANAGER_HOST}/sensors/${sensor.id}`, sensor, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       const { navigation } = this.props;
       let nodeId = navigation.getParam('node_id', null);
-      return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`)
+      return axios.get(`${INFRA_MANAGER_HOST}/nodes/${nodeId}?fetch_nested=sensor`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      })
     })
     .then(response => {
       let node = response.data;
@@ -128,10 +160,11 @@ const styles = StyleSheet.create({
 
 function mapStateToProps(state) {
   const { auth } = state;
-  const { loading, isAuthenticated } = auth;
+  const { loading, isAuthenticated, token } = auth;
   return {
     loading,
-    isAuthenticated
+    isAuthenticated,
+    token,
   };
 }
 

@@ -47,7 +47,7 @@ class LoginScreen extends Component {
   }
 
   render() {
-    const { isAuthenticated, navigation, intl } = this.props;
+    const { isAuthenticated, navigation } = this.props;
     return (
       <KeyboardAvoidingView behavior="padding" style={styles.container}>
         <View style={styles.loginLogo}>
@@ -77,9 +77,6 @@ class LoginScreen extends Component {
             />
             <TouchableOpacity style={styles.buttoncontainer} onPress={e=>{this.handleSubmit(e)}}>
               <Text style={styles.buttontext}>Submit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.buttoncontainer} onPress={e=>{this.gotoSignup(e)}}>
-              <Text  style={styles.buttontext}>Don't have an account? Register here.</Text>
             </TouchableOpacity>
           </View>
         </View>

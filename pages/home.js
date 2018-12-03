@@ -51,7 +51,7 @@ class HomeScreen extends Component {
     });
   }
   render() {
-    const { isAuthenticated, navigation } = this.props;
+    const { isAuthenticated, navigation, token } = this.props;
     return (
       <View style={styles.container}>
         <View style={styles.searchboxContainer}>
@@ -86,7 +86,11 @@ class HomeScreen extends Component {
               let region = _.cloneDeep(this.state.region);
               region.latitude = location.lat;
               region.longitude = location.lng;
-              return axios.get(`${INFRA_MANAGER_HOST}/buildings/search/geocode`, {
+              return axios.get(`${INFRA_MANAGER_HOST}/buildings/search/geocode`,
+              {
+                headers: {
+                  "Authorization": `Bearer ${token}`,
+                },
                 params: {
                   latitude: region.latitude,
                   longitude:  region.longitude,
@@ -202,10 +206,11 @@ const styles = StyleSheet.create({
 
 function mapStateToProps(state) {
   const { auth } = state;
-  const { loading, isAuthenticated } = auth;
+  const { loading, isAuthenticated, token } = auth;
   return {
     loading,
-    isAuthenticated
+    isAuthenticated,
+    token
   };
 }
 

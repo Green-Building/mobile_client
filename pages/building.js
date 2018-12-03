@@ -16,9 +16,13 @@ class BuildingScreen extends Component {
   }
 
   componentDidMount() {
-    const { navigation } = this.props;
+    const { navigation, token } = this.props;
     let buildingId = navigation.getParam('building_id', null);
-    return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`)
+    return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(buildingConfig => {
       let building = buildingConfig.data;
       _.forEach(building.floors, floor => {
@@ -46,12 +50,21 @@ class BuildingScreen extends Component {
   }
 
   handleDelete = (floor) => {
+    const { token } = this.props;
     console.log("floor is >>>", floor);
-    return axios.delete(`${INFRA_MANAGER_HOST}/clusters/${floor.cluster.id}`)
+    return axios.delete(`${INFRA_MANAGER_HOST}/clusters/${floor.cluster.id}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       const { navigation } = this.props;
       let buildingId = navigation.getParam('building_id', null);
-      return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`)
+      return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      })
     })
     .then(buildingConfig => {
       let building = buildingConfig.data;
@@ -67,11 +80,21 @@ class BuildingScreen extends Component {
   }
 
   handleAdd = (newCluster) => {
-    return axios.post(`${INFRA_MANAGER_HOST}/clusters`, newCluster)
+    const { token } = this.props;
+    return axios.post(`${INFRA_MANAGER_HOST}/clusters`,newCluster, {
+      headers: {
+        'Content-Type': 'application/json',
+        "Authorization": `Bearer ${token}`,
+      }
+    })
     .then(response => {
       const { navigation } = this.props;
       let buildingId = navigation.getParam('building_id', null);
-      return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`)
+      return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      })
     })
     .then(buildingConfig => {
       let building = buildingConfig.data;
@@ -87,11 +110,22 @@ class BuildingScreen extends Component {
   }
 
   handleUpdate = (updatedCluster) => {
-    return axios.put(`${INFRA_MANAGER_HOST}/clusters/${updatedCluster.id}`, _.omit(updatedCluster, 'id'))
+    const { token } = this.props;
+    console.log("token is >>>", token);
+    return axios.put(`${INFRA_MANAGER_HOST}/clusters/${updatedCluster.id}`, _.omit(updatedCluster, 'id'), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      }
+    })
     .then(response => {
       const { navigation } = this.props;
       let buildingId = navigation.getParam('building_id', null);
-      return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`)
+      return axios.get(`${INFRA_MANAGER_HOST}/buildings/${buildingId}?fetch_nested=floor,cluster`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      })
     })
     .then(buildingConfig => {
       let building = buildingConfig.data;
@@ -148,10 +182,11 @@ const styles = StyleSheet.create({
 
 function mapStateToProps(state) {
   const { auth } = state;
-  const { loading, isAuthenticated } = auth;
+  const { loading, isAuthenticated, token } = auth;
   return {
     loading,
-    isAuthenticated
+    isAuthenticated,
+    token,
   };
 }
 
